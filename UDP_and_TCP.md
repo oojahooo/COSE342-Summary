@@ -48,7 +48,7 @@ Highly reliable한 host-to-host protocol을 만들기 위해 설계됨.
 1. Flow Control (흐름 제어)
     - 수신 호스트가 리소스를 얼마나 받을지 제어하여 손실(버퍼 오버플로우)이 없도록 함
     - window를 이용해 수용 가능한 octet 수를 sequence number의 범위 형태로 표현  
-    -> 어떤 octet의 seq num이 마지막으로 받은 ack num과 window보다 작거나 같으면 octet을 보낼 수 있음
+    -> 어떤 octet의 seq num이 마지막으로 받은 ack num과 window의 합보다 작거나 같으면 octet을 보낼 수 있음
 1. Multiplexing (한 호스트가 여러 프로세스 감당 가능)
     - 한 연결에서 socket 쌍이 \<address + port\>로 unique하게 결정
     - port는 정의상 아무거나 써도 되지만 어플리케이션마다 약속된 port를 자주 사용
@@ -104,12 +104,12 @@ Highly reliable한 host-to-host protocol을 만들기 위해 설계됨.
   - Source Port (16bits), Destination Port (16bits)
   - Sequence Number - 랜덤
   - Acknowledgement Number - (expected) next sequence number
-  - Data Offset (4bits, units of 4 octets)
+  - Data Offset (4bits, units of 4 octets) - 데이터가 시작하는 위치를 표현하기 위함. TCP 헤더는 가변 길이이기 때문
   - Control Bits -URG, ACK, PSH, RST, SYN, FIN
   - Window (16bits)  
   receiver 입장에서 acknowledgement field 이후부터 데이터를 얼마나 받을 수 있을지 sender에게 알리기 위한 필드
   - Checksum
-  - Urgent Point
+  - Urgent Pointer
   - TCP options
     - Case 1: A single octet options (Type only)
       - End of options list (Type:0), No-Operation option (Type:1)
@@ -149,7 +149,7 @@ Highly reliable한 host-to-host protocol을 만들기 위해 설계됨.
       - acknowledgment from the receiving TCP segment
     - SEG.LEN - segment length
       - the data size in the receiving TCP segment.
-      - Total length – IP header size (IHL*4) – TCP header Size (DataOffset*4).
+      - Total length – IP header size (IHL\*4) – TCP header Size (DataOffset\*4).
       - Typically, Total length–20-20.
     - SEG.WND - segment window
       - the tx buffer position for data to be sent : SEG.ACK+SEG.WND

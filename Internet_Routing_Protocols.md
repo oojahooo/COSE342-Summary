@@ -27,7 +27,7 @@
   - IP option 참고
   - 근데 잘 안 쓰임
 
-### Distributed Routing and reachability algorithms
+### 라우팅을 위한 알고리즘들
 
 - Distance vector algorithm
   - **나는 목적지로부터 이만큼 멀어!**
@@ -50,14 +50,15 @@
 
 ## Distance Vector Algorithm in RIPv2
 
-- 라우팅은 sender가 원하는 목적지까지의 경로를 찾는 과정
-- IP에서 네트워크는 하나의 entity. 소스 네트워크에서 목적지 네트워크까지 라우터의 나열을 찾아야 함
+- IP에서 네트워크는 하나의 entity
 - Distance Vector Algorithm은 라우터가 목적지와 목적지까지의 cost 정보를 교환해야 성립
 - 각 게이트웨이는 라우팅 프로토콜을 가지고 목적지 관련 정보를 모아둠
 - 일반적으로, 라우터는 연결에 대한 정보와 목적지에 도달하는 방법에 대한 정보를 한 엔트리에 저장해두기 때문에, 호스트 입장에서는 (IP 관점에서) 그냥 라우터한테 보내면 알아서 잘 보내게 될 것이다. 신경쓰지 마라!
 - 가끔은 호스트 주소 그 자체를 라우트하는 경우도 있음. 이게 바로 네트워크 prefix가 32비트인 경우
   - Host-specific routing
 - RIP(뿐만 아니라 대부분의 프로토콜)는 호스트와 네트워크를 구분하지 않음. 걍 prefix가 32비트면 호스트, 아니면 네트워크
+- Distance Vector Algorithm은 거리 정보만 교환되어도 최적의 루트를 찾을 수 있음
+  - 다만 시스템 내의 모든 목적지에 대한 베스트 루트를 테이블로써 가지고 있어야 하고, 이를 만들기 위해 metric을 각 hop의 cost의 총합으로써 구할 수 있어야 함
 
 ### Entry in The Routing Database
 
@@ -67,7 +68,10 @@
 
 ### Bellman-Ford Algorithm
 
-- 알지?
+- D(i,j) = metric i to j
+- d(i,j) = cost i to j -> 바로 붙어있는 애들한테 쓰는 거라고 보면 됨
+- D(i,i) = 0 for all i
+- D(i,j) = min\_k(d(i,k)+D(k,j)) for i!=j
 - 이 알고리즘에서 D(i,j)는 몇번 반복하면 결국 어떤 값으로 수렴함
 - basic assumption
   - 엔티티는 메트릭의 업데이트와 재계산을 무조건 해야 함
@@ -84,7 +88,7 @@
   - D'이 더 작으면 <N, D', G'>로 업데이트
   - D'이 더 작지 않은데, G = G'이면 \<N, D', G\>로 업데이트 -> 같은 라우터에 대해 코스트가 증가했다는 의미이므로 이럴 때에는 예외로 업데이트 해야 함
 
-### RIPv2에서의 Distance Vector Algorihm의 문제
+### RIPv2에서의 Distance Vector Algorihm의 한계
 
 - RIPv2는 주고받는 정보에 버전정보가 없음 -> **counting to infinity**
 - 15hop 이하의 경로에 대해서만 쓸만함
@@ -99,7 +103,7 @@
   - Split horizon
   - Split horizon with Poison Reverse
   - Triggered update
-- 그냥 버전정보(sequence number)를 업데이트하는 게 제일 편한데 위 방법으로도 충분히 커버는 됨
+- 그냥 버전정보(sequence number and/or age)를 업데이트하는 게 제일 편한데 위 방법으로도 충분히 커버는 됨
 
 #### Split Horizon
 
@@ -135,7 +139,7 @@
   - next-hop의 주소
   - 인터페이스 (next-hop 가는 데 쓰이는)
   - 루트가 최근에 바뀌었는지 확인하기 위한 flag
-  - 루트와 관련된 타이
+  - 루트와 관련된 타이머
 - 처음 엔트리 만들 땐 직접 연결되어 있는 네트워크에 대한 정보만 만들어짐. 메트릭은 1로 (표준이 강제한 건 아니지만 다 이렇게 만듦)
 
 #### RIPv2 Spec

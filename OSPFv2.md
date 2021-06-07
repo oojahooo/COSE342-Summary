@@ -31,13 +31,13 @@
     **주의: 각 프로토콜의 라우팅 테이블은 IPv4에서의 라우팅 테이블(포워딩 테이블)과 독립적인 것**
   - 하나의 AS 내부에서 돌아감 (IGP)
   - 2-tier hierarchical 라우팅 프로토콜
-    - Backbone Area (Area 0)
+    - Backbone Area (Area 0): 모든 area와 연결된 대표 area
     - Non-backbone Area
   - area 안에서는 토폴로지 데이터베이스를 고대로 만들어서 사용 (using Dijkstra algorithm)
-  - area 밖에서는 (exterior-AS routing) reachablility 정보를 사용함 (like distance vector algorithm)
+  - area 밖에서는 (inter-area, exterior-AS routing) reachablility 정보를 사용함 (like distance vector algorithm)
     - 그래서 area border router 부분은 SPT에서 leaves일 수밖에
 
-### 2-tier Hierarchical Routing Protocol
+### Link State Advertizement Types
 
 - Intra-Areea Topology Information
   - Router-LSA (LSA Type 1): a router information
@@ -52,8 +52,8 @@
 ### Building Shortet Path Tree (SPT)
 
 1. Area 단위로 SPT 생성
-    - (Phase 1) Intra-area의 intermediate 노드에 대한 SPT 생성
-    - (Phase 2) stub destinations를 SPT에 추가
+    - (Phase 1) Intra-area의 intermediate 노드에 대한 SPT 생성 (Type 1, 2 생성)
+    - (Phase 2) stub destinations를 SPT에 추가 (Type 1 추가)
 1. Intra-area destinations와 ASBRs를 SPF에 추가
     - summary-LSA (Type 3)
     - summary-LSA (Type 4)

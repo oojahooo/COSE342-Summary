@@ -42,7 +42,7 @@
 - (1-B) 로컬 IP 모듈이 데이터를 보내도록 호출
   - 목적지 주소와 몇가지 파라미터를 넘겨서 호출
 - (2-A) datagram header를 만들고 거기에 데이터를 붙임
-  - Protocol Data Unit (PUD)
+  - Protocol Data Unit (PDU)
   - 다음 hop을 결정하여 그 IP 주소를 알아냄
 - (2-B) 다음 hop에 대한 link-layer 주소를 알아냄
 - (2-C) datagram을 보냄
@@ -85,8 +85,8 @@
 
 - Version (4bits): 4
 - Internet Header Length (IHL) (4bits, unit of 4 octets)
-  – 옵션이 없으면(거의 대부분) 5
-  – 최대 60 옥텟 (옵션의 최대 길이는 40 옥텟)
+  - 옵션이 없으면(거의 대부분) 5
+  - 최대 60 옥텟 (옵션의 최대 길이는 40 옥텟)
 - Type of Service (8bits)
   - DS Field
   - ECN
@@ -103,6 +103,13 @@
   - 헤더에 대해서만 계산, 중간에 필드 바뀌면 당연히 다시 계산. 근데 사실 중간에는 TTL만 바뀜ㅋㅋ
   - HC' = ~(C + (-m) + m') = ~(~HC + ~m + m')
 - Options (안 중요함)
+  - Loose Source and Record Route Option
+    - 대충 해당 패킷(datagram)의 라우팅 정보를 알아낼 수 있는 옵션인듯
+    - 9개의 주소까지 데이터에 들어갈 수 있다 함
+    - 이거 이용해서 받은 경로 그대로 되돌려줄 수도 있음
+  - Strict Source and Record Route Option
+    - 얘는 loose와 달리 바로옆 주소로 보낼 때 정해져 있는 경로를 의미
+  - Router Alert Option
 
 ## IPv4 Host Data Structure
 
@@ -134,7 +141,7 @@
 #### Routing Outband Datagrams
 
   - IP layer는 각 datagram마다 올바른 next hop을 선택
-    - destination이 연결되어 있으면 바로 보냄
+    - destination이 직접 연결되어 있으면 바로 보냄
     - 안 연결되어 있으면 연결된 gateway로 라우트
   - Local/Remote Decision (Local Link Determination)
     - source와 destination이 바로 연결되어 있는지 확인하는 방법
@@ -208,21 +215,21 @@
 
 - 패킷이 로컬로 배달되어 더이상 포워딩을 하지 않게 되는 경우들
   - 패킷의 목적지 주소가 정확히 라우터의 IP 주소와 일치
-  - 패킷의 목적지 주소가 limited broadcast 주소 (255.255.255.255)
+  - 패킷의 목적지 주소가 limited broadcast 주소 (내부 네트워크에 대한 broadcast, 255.255.255.255)
   - 패킷의 목적지가 멀티캐스트 주소의 멤버이고 포워딩하지 말라면
 - 패킷을 포워더에 넘기면서 동시에 로컬로 받는 경우들
-  - 패킷의 목적지 주소가 directed broadcast 주소
+  - 패킷의 목적지 주소가 directed broadcast 주소 (외부 네트워크까지 broadcast, 111.111.1.255)
   - 패킷의 목적지가 멀티캐스트 주소의 멤버이고 포워딩이 허락됨
 - 나머지 모든 경우는 바로 포워더에 넘겨짐
 
 ### Local/Remote Decision for forwarding packets
 
-- IP 주소 없이 네트워크 인터페이스가 바로 연결되는 경우 (P2P 같은 거)
-  - 다른 IP 목적지 주소가 있는 라우터 id를 비교해서 id가 같으면 패킷을 보냄
+- IP 주소 없이 네트워크 인터페이스가 바로 연결되는 경우 (Point-to-Point 같은 거)
+  - 상대 라우터 id 보고 패킷을 보냄
 - IP 주소가 라우터에 바로 대응되는 경우 (라우터랑 호스트가 직접 연결된 경우)
   1. 인터페이스의 네트워크 prefix (인터페이스 주소 & 인터페이스 네트워크 마스크)
   1. 패킷의 목적지 IP 주소의 prefix (목적지 주소 & 목적지 네트워크 마스크)
-  - 위 두 값이 같으면 패킷이 해당 인터페이스로 전달
+  - 위 두 값이 같으면 (즉 그 인터페이스가 목적지에 붙어있다는 뜻ㅎ) 패킷이 해당 인터페이스로 전달
 - 둘 다 아니면 포워딩
 
 ### Next Hop Address
@@ -245,9 +252,9 @@
   1. Basic Match == Full Match
   1. Longest Match
   1. Weak ToS
-    - 후보 루트들에 대해 route.tos == ip.tos인 것들만 남김
-    - 같은 게 없으면 걍 route.tos == 0000인 것들 남김
+      - 후보 루트들에 대해 route.tos == ip.tos인 것들만 남김
+      - 같은 게 없으면 걍 route.tos == 0000인 것들 남김
   1. Best Metric
-   - route.domain이 같은데 route.metric이 더 큰 애가 있으면(코스트가 높으므로 더 비효율) 후보에서 탈락
+     - route.domain이 같은데 route.metric이 더 큰 애가 있으면(코스트가 높으므로 더 비효율) 후보에서 탈락
   1. Vendor Policy
-    - 이제 사실상 제너럴한 방법은 다 썼으니 벤더가 더 pruning 할거면 해라
+      - 이제 사실상 제너럴한 방법은 다 썼으니 벤더가 더 pruning 할거면 해라
