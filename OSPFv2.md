@@ -123,4 +123,20 @@ PPT를 보셈
 - Link State Update
 - Link State Ack
 
+## SPF와 Routing Table 만드는 과정
 
+1. SPF = {root}, CandidateList = {}로 시작
+1. V = 방금 SPF에 추가한 노드, V의 이웃 노드들 (LSA database의 link)을 확인
+    1. stub인지 확인해서 아닌 노드들 확인. 각각 W라 하자
+    1. W의 LSA를 확인
+    1. W가 이미 SFP에 있는지 확인. 있으면 넘기고 다음 노드 확인. 없으면 다음 스텝으로
+    1. W.d (cost) 계산. candidateList에 W가 있으면 해당 W의 cost와 비교.
+        1. W.d > W.d' -> 스킵
+        1. W.d == W.d' -> W에 next-hop 정보 추가. equal-cost path로써 여러 nh 취급
+        1. W.d < W.d' -> candidateList에 바꿔치기
+1. CandidateList 비었는지 확인. 안 비어있다면 가장 가까운(cost가 작은) 노드 꺼냄. SPF에 추가
+1. 방금 추가한 노드 (X라 하자)가 라우팅 테이블에 추가해야 할 노드인지 확인. 아래 셋 중 하나이며 테이블에 없다면 추가
+    1. ABR or ASBR?
+    1. endpoint of a virtual link?
+    1. transit network?
+1. 2번으로 돌아가 반복
